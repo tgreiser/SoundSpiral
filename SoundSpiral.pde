@@ -13,7 +13,9 @@ MidiBus bus;
 color[] colors;
 
 void setup() {
-  size(600, 600);
+  //size(600, 600);
+  fullScreen();
+  surface.setResizable(true);
   
   colors = new color[12];
   colors[0] = #f99220; // A
@@ -31,19 +33,7 @@ void setup() {
   
   pts = new PVector[len];
   labelpts = new PVector[13];
-  // generate points
-  for (int iX = 0; iX < len; iX++) {
-    float f = float(iX) / len * 2 * PI * spiralGrowth;
-    float x = f * cos(f) * float(rad);
-    float y = f * sin(f) * float(rad);
-    pts[iX] = new PVector(x, y);
-  }
-  for (int iX = 0; iX < 13; iX++) {
-    float f = float(iX + len) / len * 2 * PI * spiralGrowth;
-    float x = f * cos(f) * float(rad);
-    float y = f * sin(f) * float(rad);
-    labelpts[iX] = new PVector(x, y);
-  }
+  generatePoints();
   
   lit = new int[len];
   
@@ -61,13 +51,37 @@ void setup() {
   }
 }
 
+void generatePoints() {
+  // generate points
+  for (int iX = 0; iX < len; iX++) {
+    float f = float(iX) / len * 2 * PI * spiralGrowth;
+    float x = f * cos(f) * float(rad);
+    float y = f * sin(f) * float(rad);
+    pts[iX] = new PVector(x, y);
+  }
+  for (int iX = 0; iX < 13; iX++) {
+    float f = float(iX + len) / len * 2 * PI * spiralGrowth;
+    float x = f * cos(f) * float(rad);
+    float y = f * sin(f) * float(rad);
+    labelpts[iX] = new PVector(x, y);
+  }
+}
+
+int lastHeight;
 void draw() {
+  if (lastHeight != height) {
+    maxrad = int(float(height) * .5);
+    rad = int(maxrad / 100);
+    generatePoints();
+    lastHeight = height;
+  }
   background(0);
   
   translate(width/2, height/2);
-//  rotate(PI/6.0);
+  rotate(PI/4);
   for (int iX = 0; iX < len-1; iX++) {
     stroke(colors[11-((iX+1)%12)]);
+    fill(colors[11-((iX+1)%12)]);
     line(pts[iX].x, pts[iX].y, pts[iX+1].x, pts[iX+1].y);
     
     if (lit[iX] > 0) {
@@ -76,6 +90,7 @@ void draw() {
       ellipse(midpoint.x, midpoint.y, 8, 8);
     }
   }
+  fill(#ffffff);
   for (int iX = 0; iX < 12; iX++) {
     PVector midpoint = new PVector((labelpts[iX].x + labelpts[iX+1].x)/2, (labelpts[iX].y + labelpts[iX+1].y)/2);
     text(getLabel(iX), midpoint.x, midpoint.y);
